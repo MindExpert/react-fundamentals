@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Post } from '../App'
 import styled from 'styled-components';
 
+
 interface ListGroupProps {
     items: Post[];
     heading: string;
@@ -17,10 +18,12 @@ const List = styled.ul`
 interface ListItemProps {
     active: boolean;
 }
-const ListItem = styled.li<ListItemProps>`
+const ListItem = styled.li.withConfig({
+    shouldForwardProp: (prop) => prop !== 'active'
+}) <ListItemProps>`
     padding: 10px;
     cursor: pointer;
-    background-color: ${(props) => (props.active ? '#f9f9f9' : 'white')};
+    background-color: ${({ active }) => (active ? '#f9f9f9' : 'white')};
     &:hover {
         background-color: #f9f9f9;
     }
@@ -38,8 +41,8 @@ function ListGroup({ items, heading, onItemSelect }: ListGroupProps) {
             <List>
                 {items.map((item, index) => (
                     <ListItem
-                        active={selectedIndex === index}
                         key={index}
+                        active={selectedIndex === index}
                         onClick={() => {
                             setSelectedIndex(index);
                             if (onItemSelect) {
