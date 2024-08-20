@@ -10,43 +10,21 @@ import ExpenseList from './expense-tracker/components/ExpenseList';
 import ExpenseFilter from './expense-tracker/components/ExpenseFilter';
 import ExpenseForm from './expense-tracker/components/ExpenseForm';
 import ProductList from './components/ProductList';
+import axios from 'axios';
+
+export interface Post {
+	id: number;
+	title: string;
+	body: string;
+	userId: number;
+}
 
 function App() {
-	let items = [
-		'New York',
-		'San Francisco',
-		'Tokyo',
-		'London',
-		'Paris',
-	];
-
 	const ref = useRef<HTMLInputElement>(null);
-
-	// After Render
-	useEffect(() => {
-		//Side Effects
-		if (ref.current) {
-			ref.current.focus();
-		}
-	});
-
-	const handleItemSelect = (item: string) => {
-		console.log(item);
-	}
-
 	const [alertVisible, setAlertVisible] = useState(true);
 	const [selectedCategory, setSelectedCategory] = useState('');
-
 	const [categories, setCategories] = useState<string[]>([]);
 	const [category, setCategory] = useState<string>('');
-	useEffect(() => {
-		fetch('https://fakestoreapi.com/products/categories')
-			.then((res) => res.json())
-			.then((json) => {
-				setCategories(json);
-			});
-	}, []);
-
 	const [expenses, setExpenses] = useState([
 		{ id: '1', description: 'Lunch', amount: 10, category: 'Groceries' },
 		{ id: '2', description: 'Uber', amount: 20, category: 'Utilities' },
@@ -56,6 +34,28 @@ function App() {
 		{ id: '6', description: 'Water', amount: 160, category: 'Utilities' },
 		{ id: '7', description: 'Dinner', amount: 35, category: 'Groceries' },
 	]);
+	const [items, setItems] = useState<Post[]>([]);
+
+	const handleItemSelect = (item: Post) => {
+		console.log(item);
+	}
+
+	// After Render
+	useEffect(() => {
+		fetch('https://fakestoreapi.com/products/categories')
+			.then((res) => res.json())
+			.then((json) => {
+				setCategories(json);
+			});
+
+		axios.get<Post[]>('https://jsonplaceholder.typicode.com/posts')
+			.then(res => setItems(res.data));
+
+		//Side Effects
+		if (ref.current) {
+			ref.current.focus();
+		}
+	}, []);
 
 	const filteredExpenses = selectedCategory
 		? expenses.filter((expense) => expense.category === selectedCategory)
@@ -98,7 +98,7 @@ function App() {
 
 				<div className='row mt-4'>
 					<div className='col-7'>
-						<ListGroup items={items} heading={"Cities"} onItemSelect={handleItemSelect} />
+						<ListGroup items={items} heading={"Users"} onItemSelect={handleItemSelect} />
 					</div>
 					<div className='col-5'>
 						<ExpendableText length={50}>
@@ -140,7 +140,6 @@ function App() {
 
 				<div className="row">
 					<div className="col-md-6">
-						{/* build a select categories, from the state */}
 						<select
 							className="form-select"
 							onChange={(event) => setCategory(event.target.value)}

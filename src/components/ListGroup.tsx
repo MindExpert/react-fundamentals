@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Post } from '../App'
 import styled from 'styled-components';
 
 interface ListGroupProps {
-    items: string[];
+    items: Post[];
     heading: string;
-    onItemSelect?: (item: string) => void;
+    onItemSelect?: (item: Post) => void;
 }
 
 const List = styled.ul`
@@ -26,6 +27,7 @@ const ListItem = styled.li<ListItemProps>`
 `;
 
 function ListGroup({ items, heading, onItemSelect }: ListGroupProps) {
+
     // Hook
     const [selectedIndex, setSelectedIndex] = useState(-1);
 
@@ -45,7 +47,7 @@ function ListGroup({ items, heading, onItemSelect }: ListGroupProps) {
                             }
                         }}
                     >
-                        {item}
+                        {item.title}
                     </ListItem>
                 ))}
             </List>
