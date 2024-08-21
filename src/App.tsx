@@ -23,7 +23,7 @@ export interface Product {
 
 function App() {
 	const ref = useRef<HTMLInputElement>(null);
-	const [alertVisible, setAlertVisible] = useState(true);
+	const [alertVisible, setAlertVisible] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState('');
 	const [categories, setCategories] = useState<string[]>([]);
 	const [category, setCategory] = useState<string>('');
@@ -42,6 +42,18 @@ function App() {
 
 	const handleItemSelect = (item: Product) => {
 		console.log(item);
+	}
+
+	const handleItemDelete = (item: Product) => {
+		setLoading(true);
+		// delete the product item from the server and remuve it from the list
+		axios.delete(`https://fakestoreapi.com/products/${item.id}`)
+			.then(() => {
+				setItems(items.filter((i) => i.id !== item.id));
+			})
+			.catch((err) => {
+				setError((err as AxiosError).message);
+			}).finally(() => setLoading(false));
 	}
 
 	// After Render
@@ -132,7 +144,7 @@ function App() {
 					<div className='col-7'>
 						{error && <p className='text-danger'>{error}</p>}
 						{isLoading && <div className="spinner-border"></div>}
-						<ListGroup items={items} heading={"Users"} onItemSelect={handleItemSelect} />
+						<ListGroup items={items} heading={"Products"} onItemSelect={handleItemSelect} onItemDelete={handleItemDelete} />
 					</div>
 					<div className='col-5'>
 						<ExpendableText length={50}>

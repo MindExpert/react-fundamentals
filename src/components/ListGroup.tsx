@@ -7,6 +7,7 @@ interface ListGroupProps {
     items: Product[];
     heading: string;
     onItemSelect?: (item: Product) => void;
+    onItemDelete?: (item: Product) => void;
 }
 
 const List = styled.ul`
@@ -29,7 +30,7 @@ const ListItem = styled.li.withConfig({
     }
 `;
 
-function ListGroup({ items, heading, onItemSelect }: ListGroupProps) {
+function ListGroup({ items, heading, onItemSelect, onItemDelete }: ListGroupProps) {
 
     // Hook
     const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -50,7 +51,12 @@ function ListGroup({ items, heading, onItemSelect }: ListGroupProps) {
                             }
                         }}
                     >
-                        {item.title}
+                        {item.title}{' '} <button type="button" className="btn btn-sm btn-outline-danger" onClick={(event) => {
+                            event.stopPropagation();
+                            if (onItemDelete) {
+                                onItemDelete(item);
+                            }
+                        }}>Delete</button>
                     </ListItem>
                 ))}
             </List>
