@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Post } from '../App'
+import { Product } from '../App'
 import styled from 'styled-components';
 
 
 interface ListGroupProps {
-    items: Post[];
+    items: Product[];
     heading: string;
-    onItemSelect?: (item: Post) => void;
+    onItemSelect?: (item: Product) => void;
 }
 
 const List = styled.ul`

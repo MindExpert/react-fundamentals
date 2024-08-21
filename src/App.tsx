@@ -10,13 +10,15 @@ import ExpenseList from './expense-tracker/components/ExpenseList';
 import ExpenseFilter from './expense-tracker/components/ExpenseFilter';
 import ExpenseForm from './expense-tracker/components/ExpenseForm';
 import ProductList from './components/ProductList';
-import axios from 'axios';
+import axios, { AxiosError, CanceledError } from 'axios';
 
-export interface Post {
+export interface Product {
 	id: number;
 	title: string;
-	body: string;
-	userId: number;
+	price: number;
+	category: string;
+	description: string;
+	image: string;
 }
 
 function App() {
@@ -34,24 +36,54 @@ function App() {
 		{ id: '6', description: 'Water', amount: 160, category: 'Utilities' },
 		{ id: '7', description: 'Dinner', amount: 35, category: 'Groceries' },
 	]);
-	const [items, setItems] = useState<Post[]>([]);
+	const [items, setItems] = useState<Product[]>([]);
+	const [error, setError] = useState<string>('');
+	const [isLoading, setLoading] = useState<boolean>(false);
 
-	const handleItemSelect = (item: Post) => {
+	const handleItemSelect = (item: Product) => {
 		console.log(item);
 	}
 
 	// After Render
 	useEffect(() => {
+		const controller = new AbortController();
+
+		setLoading(true);
+
+		//v1. Promises get -> promise -> result/error
+		axios.
+			get<Product[]>('https://fakestoreapi.com/products?limit=5', {
+				signal: controller.signal,
+			})
+			.then(res => setItems(res.data))
+			.catch((err) => {
+				if (err instanceof CanceledError) return;
+				setError((err as AxiosError).message);
+			})
+			.finally(() => setLoading(false));
+
+		//v.2 async/await
+		// const fetchProductsData = async () => {
+		// 	try {
+		// 		const res = await axios.get<Product[]>('https://fakestoreapi.com/products?limit=5');
+		// 		setItems(res.data);
+		// 	} catch (err) {
+		// 		setError((err as AxiosError).message);
+		// 	}
+		// }
+		//fetchProductsData();
+		return () => controller.abort();
+	}, []);
+
+	useEffect(() => {
+		//Side Effects
 		fetch('https://fakestoreapi.com/products/categories')
 			.then((res) => res.json())
 			.then((json) => {
 				setCategories(json);
-			});
+			})
+			.catch(err => setError(err.message));
 
-		axios.get<Post[]>('https://jsonplaceholder.typicode.com/posts')
-			.then(res => setItems(res.data));
-
-		//Side Effects
 		if (ref.current) {
 			ref.current.focus();
 		}
@@ -98,6 +130,8 @@ function App() {
 
 				<div className='row mt-4'>
 					<div className='col-7'>
+						{error && <p className='text-danger'>{error}</p>}
+						{isLoading && <div className="spinner-border"></div>}
 						<ListGroup items={items} heading={"Users"} onItemSelect={handleItemSelect} />
 					</div>
 					<div className='col-5'>
