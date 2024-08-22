@@ -21,7 +21,8 @@ const useProducts = () => {
         return () => cancel();
     }, []);
 
-    return { items, error, isLoading, setItems, setError };
+    // we return the state and the setter functions so that the component can use them
+    return { items, error, isLoading, setLoading, setItems, setError };
 }
 
 export default useProducts;

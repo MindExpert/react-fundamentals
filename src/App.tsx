@@ -10,8 +10,9 @@ import ExpenseList from './expense-tracker/components/ExpenseList';
 import ExpenseFilter from './expense-tracker/components/ExpenseFilter';
 import ExpenseForm from './expense-tracker/components/ExpenseForm';
 import ProductList from './components/ProductList';
-import { AxiosError, CanceledError } from './services/api-client';
+import { AxiosError } from './services/api-client';
 import ProductService, { Product } from './services/product-service';
+import useProducts from './hooks/useProducts';
 
 function App() {
 	const ref = useRef<HTMLInputElement>(null);
@@ -28,27 +29,8 @@ function App() {
 		{ id: '6', description: 'Water', amount: 160, category: 'Utilities' },
 		{ id: '7', description: 'Dinner', amount: 35, category: 'Groceries' },
 	]);
-	const [items, setItems] = useState<Product[]>([]);
-	const [error, setError] = useState<string>('');
-	const [isLoading, setLoading] = useState<boolean>(false);
-
-	// After Render
-	useEffect(() => {
-		//Side Effects
-
-		//v1. Promises get -> promise -> result/error [SERVICES]
-		setLoading(true);
-		const { request, cancel } = ProductService.getAll<Product>();
-		request
-			.then(res => setItems(res.data))
-			.catch((err) => {
-				if (err instanceof CanceledError) return;
-				setError((err as AxiosError).message);
-			})
-			.finally(() => setLoading(false));
-
-		return () => cancel();
-	}, []);
+	// Custom Hook
+	const { items, error, isLoading, setLoading, setItems, setError } = useProducts();
 
 	useEffect(() => {
 		//v.2 async/await
