@@ -1,7 +1,8 @@
 import apiClient from "./api-client";
 
-interface Entity {
+export interface Entity {
     id: number;
+    title: string;
 }
 
 class HttpService {
@@ -28,6 +29,9 @@ class HttpService {
     }
 
     update<T extends Entity>(id: number, entity: T) {
+        //Mocking the update data
+        entity.title = "test product";
+
         return apiClient.patch(this.endpoint + "/" + id, entity);
     }
 }

@@ -38,8 +38,9 @@ function App() {
 
 		//v1. Promises get -> promise -> result/error [SERVICES]
 		setLoading(true);
-		const { request, cancel } = ProductService.getAllProducts();
-		request.then(res => setItems(res.data))
+		const { request, cancel } = ProductService.getAll<Product>();
+		request
+			.then(res => setItems(res.data))
 			.catch((err) => {
 				if (err instanceof CanceledError) return;
 				setError((err as AxiosError).message);
@@ -82,7 +83,7 @@ function App() {
 	// delete the product item from the server and remuve it from the list [SERVICES]
 	const handleItemDelete = (item: Product) => {
 		setLoading(true);
-		const request = ProductService.deleteProduct(item.id);
+		const request = ProductService.delete(item.id);
 		request
 			.then(() => {
 				setItems(items.filter((i) => i.id !== item.id));
@@ -96,7 +97,7 @@ function App() {
 		// update the product item on the server and update it in the list
 		setLoading(true);
 
-		const request = ProductService.updateProduct(item.id, item);
+		const request = ProductService.update(item.id, item);
 
 		request
 			.then((res) => {
