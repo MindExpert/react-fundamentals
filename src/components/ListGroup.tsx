@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Product } from '../App'
+import { Product } from '../services/product-service';
 import styled from 'styled-components';
 
 
@@ -8,6 +8,7 @@ interface ListGroupProps {
     heading: string;
     onItemSelect?: (item: Product) => void;
     onItemDelete?: (item: Product) => void;
+    onItemUpdate?: (item: Product) => void;
 }
 
 const List = styled.ul`
@@ -24,13 +25,15 @@ const ListItem = styled.li.withConfig({
 }) <ListItemProps>`
     padding: 10px;
     cursor: pointer;
-    background-color: ${({ active }) => (active ? '#f9f9f9' : 'white')};
+    display: flex;
+    justify-content: space-between;
+    background-color: ${({ active }) => (active ? '#f1eaeae6' : 'white')};
     &:hover {
         background-color: #f9f9f9;
     }
 `;
 
-function ListGroup({ items, heading, onItemSelect, onItemDelete }: ListGroupProps) {
+function ListGroup({ items, heading, onItemSelect, onItemDelete, onItemUpdate }: ListGroupProps) {
 
     // Hook
     const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -51,12 +54,21 @@ function ListGroup({ items, heading, onItemSelect, onItemDelete }: ListGroupProp
                             }
                         }}
                     >
-                        {item.title}{' '} <button type="button" className="btn btn-sm btn-outline-danger" onClick={(event) => {
-                            event.stopPropagation();
-                            if (onItemDelete) {
-                                onItemDelete(item);
-                            }
-                        }}>Delete</button>
+                        {item.title}
+                        <div>
+                            <button type="button" className="btn btn-sm btn-outline-info mx-1" onClick={(event) => {
+                                event.stopPropagation();
+                                if (onItemUpdate) {
+                                    onItemUpdate(item);
+                                }
+                            }}>Update</button>
+                            <button type="button" className="btn btn-sm btn-outline-danger" onClick={(event) => {
+                                event.stopPropagation();
+                                if (onItemDelete) {
+                                    onItemDelete(item);
+                                }
+                            }}>Delete</button>
+                        </div>
                     </ListItem>
                 ))}
             </List>

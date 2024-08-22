@@ -10,16 +10,8 @@ import ExpenseList from './expense-tracker/components/ExpenseList';
 import ExpenseFilter from './expense-tracker/components/ExpenseFilter';
 import ExpenseForm from './expense-tracker/components/ExpenseForm';
 import ProductList from './components/ProductList';
-import axios, { AxiosError, CanceledError } from 'axios';
-
-export interface Product {
-	id: number;
-	title: string;
-	price: number;
-	category: string;
-	description: string;
-	image: string;
-}
+import { AxiosError, CanceledError } from './services/api-client';
+import ProductService, { Product } from './services/product-service';
 
 function App() {
 	const ref = useRef<HTMLInputElement>(null);
@@ -40,40 +32,24 @@ function App() {
 	const [error, setError] = useState<string>('');
 	const [isLoading, setLoading] = useState<boolean>(false);
 
-	const handleItemSelect = (item: Product) => {
-		console.log(item);
-	}
-
-	const handleItemDelete = (item: Product) => {
-		setLoading(true);
-		// delete the product item from the server and remuve it from the list
-		axios.delete(`https://fakestoreapi.com/products/${item.id}`)
-			.then(() => {
-				setItems(items.filter((i) => i.id !== item.id));
-			})
-			.catch((err) => {
-				setError((err as AxiosError).message);
-			}).finally(() => setLoading(false));
-	}
-
 	// After Render
 	useEffect(() => {
-		const controller = new AbortController();
+		//Side Effects
 
+		//v1. Promises get -> promise -> result/error [SERVICES]
 		setLoading(true);
-
-		//v1. Promises get -> promise -> result/error
-		axios.
-			get<Product[]>('https://fakestoreapi.com/products?limit=5', {
-				signal: controller.signal,
-			})
-			.then(res => setItems(res.data))
+		const { request, cancel } = ProductService.getAllProducts();
+		request.then(res => setItems(res.data))
 			.catch((err) => {
 				if (err instanceof CanceledError) return;
 				setError((err as AxiosError).message);
 			})
 			.finally(() => setLoading(false));
 
+		return () => cancel();
+	}, []);
+
+	useEffect(() => {
 		//v.2 async/await
 		// const fetchProductsData = async () => {
 		// 	try {
@@ -84,11 +60,9 @@ function App() {
 		// 	}
 		// }
 		//fetchProductsData();
-		return () => controller.abort();
 	}, []);
 
 	useEffect(() => {
-		//Side Effects
 		fetch('https://fakestoreapi.com/products/categories')
 			.then((res) => res.json())
 			.then((json) => {
@@ -100,6 +74,38 @@ function App() {
 			ref.current.focus();
 		}
 	}, []);
+
+	const handleItemSelect = (item: Product) => {
+		console.log(item);
+	}
+
+	// delete the product item from the server and remuve it from the list [SERVICES]
+	const handleItemDelete = (item: Product) => {
+		setLoading(true);
+		const request = ProductService.deleteProduct(item);
+		request
+			.then(() => {
+				setItems(items.filter((i) => i.id !== item.id));
+			})
+			.catch((err) => {
+				setError((err as AxiosError).message);
+			}).finally(() => setLoading(false));
+	}
+
+	const handleItemUpdate = (item: Product) => {
+		// update the product item on the server and update it in the list
+		setLoading(true);
+
+		const request = ProductService.updateProduct(item);
+
+		request
+			.then((res) => {
+				setItems(items.map((i) => i.id === res.data.id ? res.data : i));
+			})
+			.catch((err) => {
+				setError((err as AxiosError).message);
+			}).finally(() => setLoading(false));
+	}
 
 	const filteredExpenses = selectedCategory
 		? expenses.filter((expense) => expense.category === selectedCategory)
@@ -144,7 +150,13 @@ function App() {
 					<div className='col-7'>
 						{error && <p className='text-danger'>{error}</p>}
 						{isLoading && <div className="spinner-border"></div>}
-						<ListGroup items={items} heading={"Products"} onItemSelect={handleItemSelect} onItemDelete={handleItemDelete} />
+						<ListGroup
+							items={items}
+							heading={"Products"}
+							onItemSelect={handleItemSelect}
+							onItemDelete={handleItemDelete}
+							onItemUpdate={handleItemUpdate}
+						/>
 					</div>
 					<div className='col-5'>
 						<ExpendableText length={50}>
