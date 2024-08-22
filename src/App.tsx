@@ -82,7 +82,7 @@ function App() {
 	// delete the product item from the server and remuve it from the list [SERVICES]
 	const handleItemDelete = (item: Product) => {
 		setLoading(true);
-		const request = ProductService.deleteProduct(item);
+		const request = ProductService.deleteProduct(item.id);
 		request
 			.then(() => {
 				setItems(items.filter((i) => i.id !== item.id));
@@ -96,7 +96,7 @@ function App() {
 		// update the product item on the server and update it in the list
 		setLoading(true);
 
-		const request = ProductService.updateProduct(item);
+		const request = ProductService.updateProduct(item.id, item);
 
 		request
 			.then((res) => {

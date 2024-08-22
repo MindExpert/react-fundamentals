@@ -1,4 +1,5 @@
 import apiClient from "./api-client";
+import create from "./http-service";
 
 export interface Product {
     id: number;
@@ -24,20 +25,20 @@ class ProductService {
         };
     }
 
-    deleteProduct(product: Product) {
-        return apiClient.delete(`/products/${product.id}`);
+    deleteProduct(prodId: number) {
+        return apiClient.delete(`/products/${prodId}`);
     }
 
-
-    // createProduct(product: Product): void {
-    //     // Logic to create a new product
-    // }
+    createProduct(product: Product): void {
+        // Logic to create a new product
+        console.log(product);
+    }
 
     //NOTE: when updating it should take prodId and the object it is updating [updateProduct(productId: string, updatedProduct: Product)]
-    updateProduct(product: Product) {
+    updateProduct(prodId: number, product: Product) {
         // Mociking the update data
         const itemData = {
-            id: product.id,
+            id: prodId,
             title: 'test product',
             price: 13.5,
             description: 'lorem ipsum set',
@@ -46,10 +47,9 @@ class ProductService {
             rating: { rate: 4.6, count: 400 }
         }
 
-        return apiClient.put(`/products/${itemData.id}`, itemData)
+        return apiClient.put(`/products/${prodId}`, itemData)
     }
-
-
 }
-
 export default new ProductService();
+
+// export default create<Product>('/products');
